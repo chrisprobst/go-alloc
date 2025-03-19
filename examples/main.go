@@ -8,6 +8,7 @@ import (
 	"github.com/chrisprobst/alloc"
 )
 
+// Execute within this directory with: GODEBUG=gctrace=1 go run .
 func main() {
 	go func() {
 		N := uint32(1024 * 1024 * 1024)
@@ -43,40 +44,7 @@ func main() {
 	}()
 
 	for {
-		// runtime.GC()
+		runtime.GC()
 		time.Sleep(time.Second)
 	}
 }
-
-// func main() {
-// 	s := strconv.Itoa(42731643872)
-// 	N := 1024 * 1024 * 1024
-// 	alloc := NewAlloc[Data](uint(N + 1))
-// 	datas := make([]Ptr, 0, N+1)
-// 	for {
-// 		alloc.Reset()
-// 		datas = datas[:0]
-
-// 		log.Print("Allocating...")
-// 		for range N {
-// 			datas = append(datas, alloc.Alloc())
-// 		}
-
-// 		log.Print("Filling...")
-// 		for i, p := range datas {
-// 			d := alloc.Get(p)
-// 			d.age = i * 10
-// 			d.salary = float32(i * 1000)
-// 			copy(d.name[:], s)
-// 		}
-
-// 		log.Print("Freeing...")
-// 		for _, p := range datas {
-// 			alloc.Free(p)
-// 		}
-
-// 		log.Print("Done")
-
-// 		runtime.GC()
-// 	}
-// }
