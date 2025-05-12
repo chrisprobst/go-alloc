@@ -16,6 +16,7 @@ func main() {
 
 		type Slice = alloc.Slice[uint32, uint8]
 		allocator := alloc.RegisterGlobal[uint32, uint8, byte](N, AllocOwner)
+		defer allocator.Dealloc()
 
 		datas := make([]Slice, N+1)
 
@@ -28,16 +29,21 @@ func main() {
 			}
 			log.Print("Done...")
 
+			agg := 0
 			var m runtime.MemStats
-			for {
-				runtime.ReadMemStats(&m)
-				log.Printf("Current live objects %v but allocated objects %v", m.HeapObjects, allocator.Len())
+			for j := 0; ; j++ {
+				if j%1_000_000 == 0 {
+					runtime.ReadMemStats(&m)
+					log.Printf("Current live objects %v but allocated objects %v", m.HeapObjects, allocator.Len())
 
-				agg := 0
-				for _, d := range datas[:len(datas)-1] {
+					log.Printf("Agg: %v j: %v", agg, j)
+					agg = 0
+				}
+
+				for _, d := range datas[:1000] {
 					agg += int(allocator.DerefSlice(d)[0])
 				}
-				log.Printf("Agg: %v", agg)
+
 			}
 
 		}
@@ -45,6 +51,6 @@ func main() {
 
 	for {
 		runtime.GC()
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * 10)
 	}
 }

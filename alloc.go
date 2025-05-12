@@ -1,5 +1,7 @@
 package alloc
 
+import "runtime"
+
 type Allocator[PtrSize, OwnerSize Size, T any] struct {
 	Owner OwnerSize
 
@@ -128,6 +130,14 @@ func (a *Allocator[PtrSize, OwnerSize, T]) Clear() {
 	a.freeSingle = a.freeSingle[:0]
 	a.nextFree = 0
 	a.count = 0
+}
+
+func (a *Allocator[PtrSize, OwnerSize, T]) Dealloc() {
+	a.data = nil
+	a.freeSingle = nil
+	a.nextFree = 0
+	a.count = 0
+	runtime.GC()
 }
 
 func (a *Allocator[PtrSize, OwnerSize, T]) Len() PtrSize {
